@@ -22,8 +22,10 @@ class CheckoutDayService {
             }
         }
 
+        let subtract_day = 1;
+
         const checkout_day = get_cash_in_hand_day_before(
-            data_checkout_day.day
+            data_checkout_day.day, subtract_day
         ).then(async (cash_in_hand_day_before: any) => {
             const cash_in_hand = sum_cash_in_hand(
                 data_checkout_day.cash_in_hand_card,
@@ -120,8 +122,9 @@ class CheckoutDayService {
             }
         }
 
+        let subtract_day = 1;
         const checkout_day = get_cash_in_hand_day_before(
-            data_checkout_day.day
+            data_checkout_day.day, subtract_day
         ).then(async (cash_in_hand_day_before: any) => {
             const cash_in_hand = sum_cash_in_hand(
                 data_checkout_day.cash_in_hand_card,
@@ -186,9 +189,10 @@ function calculate_sale_day(
     return Number(sale_day);
 }
 
-async function get_cash_in_hand_day_before(day: string) {
+async function get_cash_in_hand_day_before(day: string, subtract_day : number) {
     return new Promise(async (resolve, reject) => {
-        const day_before = moment(day).subtract(1, "days").toDate();
+        const day_before = moment(day).subtract(subtract_day, "days").toDate();
+
 
         const data_day_before = await prismaClient.checkout_Day.findUnique({
             where: { day: new Date(day_before) },
@@ -196,7 +200,8 @@ async function get_cash_in_hand_day_before(day: string) {
         let cash_in_hand_day_before = data_day_before?.cash_in_hand;
 
         if (cash_in_hand_day_before == null) {
-            cash_in_hand_day_before = 0;
+            subtract_day+= 1;
+            get_cash_in_hand_day_before(day, subtract_day)
         }
 
         return resolve(Number(cash_in_hand_day_before));
