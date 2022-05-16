@@ -8,7 +8,7 @@ const app = express();
 
 const corsOptions: cors.CorsOptions = {
 
-   origin: "https://web-nied-checkout.vercel.app",
+   origin: "*",
      
 };
 
