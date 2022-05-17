@@ -22,44 +22,31 @@ class CheckoutDayService {
             }
         }
 
-        let subtract_day = 1;
 
-        const checkout_day = get_cash_in_hand_day_before(
-            data_checkout_day.day, subtract_day
-        ).then(async (cash_in_hand_day_before: any) => {
-            const cash_in_hand = sum_cash_in_hand(
-                data_checkout_day.cash_in_hand_card,
-                data_checkout_day.cash_in_hand_money,
-                cash_in_hand_day_before
-            );
+        const cash_in_hand = sum_cash_in_hand(
+            data_checkout_day.cash_in_hand_card,
+            data_checkout_day.cash_in_hand_money
+        );
 
-            const sale_day = calculate_sale_day(
+        const sale_day = calculate_sale_day(
+            cash_in_hand,
+            sum_payments(data_checkout_day.payments)
+        );
+        let checkout_day: any;
+        checkout_day = await prismaClient.checkout_Day.create({
+            data: {
+                day: data_checkout_day.day,
+                day_like_string: data_checkout_day.day,
+
+                cash_in_hand_card: data_checkout_day.cash_in_hand_card,
+                cash_in_hand_money: data_checkout_day.cash_in_hand_money,
+
                 cash_in_hand,
-                sum_payments(data_checkout_day.payments),
-                Number(cash_in_hand_day_before)
-            );
-            let checkout_day: any;
-            try {
-                checkout_day = await prismaClient.checkout_Day.create({
-                    data: {
-                        day: data_checkout_day.day,
-                        day_like_string: data_checkout_day.day,
-                        cash_in_hand_card: data_checkout_day.cash_in_hand_card,
-
-                        cash_in_hand_money:
-                            data_checkout_day.cash_in_hand_money,
-                        cash_in_hand,
-                        sale_day: sale_day,
-                        profit: cash_in_hand - Number(cash_in_hand_day_before),
-                        payments: {
-                            create: data_checkout_day.payments,
-                        },
-                    },
-                });
-            } catch (err) {
-                console.error(err);
-            }
-            return checkout_day;
+                sale_day: sale_day,
+                payments: {
+                    create: data_checkout_day.payments,
+                },
+            },
         });
 
         return checkout_day;
@@ -122,43 +109,33 @@ class CheckoutDayService {
             }
         }
 
-        let subtract_day = 1;
-        const checkout_day = get_cash_in_hand_day_before(
-            data_checkout_day.day, subtract_day
-        ).then(async (cash_in_hand_day_before: any) => {
-            const cash_in_hand = sum_cash_in_hand(
-                data_checkout_day.cash_in_hand_card,
-                data_checkout_day.cash_in_hand_money,
-                cash_in_hand_day_before
-            );
+        const cash_in_hand = sum_cash_in_hand(
+            data_checkout_day.cash_in_hand_card,
+            data_checkout_day.cash_in_hand_money
+        );
 
-            const sale_day = calculate_sale_day(
+        const sale_day = calculate_sale_day(
+            cash_in_hand,
+            sum_payments(data_checkout_day.payments)
+        );
+        const checkout_day = await prismaClient.checkout_Day.update({
+            where: {
+                day: data_checkout_day.day,
+            },
+            data: {
+                day: data_checkout_day.day,
+                day_like_string: data_checkout_day.day,
+
+                cash_in_hand_card: data_checkout_day.cash_in_hand_card,
+                cash_in_hand_money: data_checkout_day.cash_in_hand_money,
+
                 cash_in_hand,
-                sum_payments(data_checkout_day.payments),
-                Number(cash_in_hand_day_before)
-            );
-            const checkout_day = await prismaClient.checkout_Day.update({
-                where: {
-                    day: data_checkout_day.day,
+                sale_day: sale_day,
+                payments: {
+                    create: data_checkout_day.payments,
                 },
-                data: {
-                    day: data_checkout_day.day,
-                    day_like_string: data_checkout_day.day,
-
-                    cash_in_hand_card: data_checkout_day.cash_in_hand_card,
-                    cash_in_hand_money: data_checkout_day.cash_in_hand_money,
-
-                    cash_in_hand,
-                    sale_day: sale_day,
-                    profit: cash_in_hand - Number(cash_in_hand_day_before),
-                    payments: {
-                        create: data_checkout_day.payments,
-                    },
-                },
-            });
-            return checkout_day;
+            },
         });
-
         return checkout_day;
     }
 
@@ -176,43 +153,17 @@ class CheckoutDayService {
     }
 }
 
-function calculate_sale_day(
-    cash_in_hand: number,
-    payments: number,
-    cash_in_hand_day_before: number
-) {
-    const sale_day = cash_in_hand + payments - cash_in_hand_day_before;
+function calculate_sale_day(cash_in_hand: number, payments: number) {
+    const sale_day = cash_in_hand + payments;
 
-    //console.log(cash_in_hand)
-    // console.log(payments)
-    //console.log(cash_in_hand_day_before)
     return Number(sale_day);
-}
-
-async function get_cash_in_hand_day_before(day: string, subtract_day : number) {
-    return new Promise(async (resolve, reject) => {
-        const day_before = moment(day).subtract(subtract_day, "days").toDate();
-
-        const data_day_before = await prismaClient.checkout_Day.findUnique({
-            where: { day: new Date(day_before) },
-        });
-        let cash_in_hand_day_before = data_day_before?.cash_in_hand;
-
-        if (cash_in_hand_day_before == null) {
-            subtract_day+= 1;
-            get_cash_in_hand_day_before(day, subtract_day)
-        }
-
-        return resolve(Number(cash_in_hand_day_before));
-    });
 }
 
 function sum_cash_in_hand(
     cash_in_hand_card: number,
-    cash_in_hand_money: number,
-    cash_in_hand_day_before: number
+    cash_in_hand_money: number
 ): number {
-    return cash_in_hand_card + cash_in_hand_money + cash_in_hand_day_before;
+    return cash_in_hand_card + cash_in_hand_money;
 }
 function sum_payments(payments: Array<any> | undefined) {
     let total_payments = 0;
