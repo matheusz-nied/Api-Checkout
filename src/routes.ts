@@ -1,11 +1,9 @@
 import { Router } from "express";
-import { AuthController } from "./controllers/AuthController";
 import { CheckoutDayController } from "./controllers/CheckoutDayController";
 
 const router = Router();
 
 const checkoutDayController = new CheckoutDayController();
-const authController = new AuthController();
 
 router.post("/api/checkoutDay", checkoutDayController.create);
 
@@ -19,6 +17,5 @@ router.put("/api/checkoutDay/:id", checkoutDayController.update);
 
 router.delete("/api/checkoutDay/:id", checkoutDayController.delete);
 
-router.post("/api/auth", authController.auth);
 
 export { router };
