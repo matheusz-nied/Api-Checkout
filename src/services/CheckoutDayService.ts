@@ -22,7 +22,6 @@ class CheckoutDayService {
             }
         }
 
-
         const cash_in_hand = sum_cash_in_hand(
             data_checkout_day.cash_in_hand_card,
             data_checkout_day.cash_in_hand_money
@@ -37,12 +36,12 @@ class CheckoutDayService {
             data: {
                 day: data_checkout_day.day,
                 day_like_string: data_checkout_day.day,
-
                 cash_in_hand_card: data_checkout_day.cash_in_hand_card,
-                cash_in_hand_money: data_checkout_day.cash_in_hand_money,
 
+                cash_in_hand_money: data_checkout_day.cash_in_hand_money,
                 cash_in_hand,
                 sale_day: sale_day,
+                profit: sale_day - sum_payments(data_checkout_day.payments),
                 payments: {
                     create: data_checkout_day.payments,
                 },

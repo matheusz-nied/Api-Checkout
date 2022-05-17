@@ -16,6 +16,7 @@ model Checkout_Day {
   cash_in_hand                     Float
   payments                         Payment[]
   sale_day                         Float
+  profit                           Float
 
   @@map("checkout_day")
 }
