@@ -193,7 +193,6 @@ async function get_cash_in_hand_day_before(day: string, subtract_day : number) {
     return new Promise(async (resolve, reject) => {
         const day_before = moment(day).subtract(subtract_day, "days").toDate();
 
-
         const data_day_before = await prismaClient.checkout_Day.findUnique({
             where: { day: new Date(day_before) },
         });
